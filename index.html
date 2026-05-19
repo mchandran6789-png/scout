@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scout — Job Search Assistant</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #08090c;
+  --bg2: #0e1015;
+  --bg3: #141720;
+  --text: #e8eaf0;
+  --muted: #4a5060;
+  --muted2: #8890a0;
+  --accent: #4fffb0;
+  --blue: #4a9eff;
+  --red: #ff5a5a;
+  --gold: #f5c542;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.container { max-width: 900px; margin: 0 auto; padding: 0; }
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-wrap: wrap;
+}
+
+.nav-brand {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-right: auto;
+}
+
+.nav-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted2);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover {
+  background: var(--bg3);
+  color: var(--text);
+}
+
+.nav-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.badge {
+  background: var(--red);
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+.content {
+  padding: 24px;
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: var(--muted2);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.form-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-input {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+textarea.form-input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-grid.full {
+  grid-template-columns: 1fr;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.btn-primary:hover {
+  background: #3ae099;
+}
+
+.btn-secondary {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+}
+
+.btn-secondary:hover {
+  background: var(--bg3);
+  color: var(--text);
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+}
+
+.stat-num {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.job-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.job-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.job-company {
+  font-size: 12px;
+  color: var(--muted2);
+  margin-bottom: 8px;
+}
+
+.job-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.mini-btn {
+  padding: 5px 12px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted2);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.mini-btn:hover {
+  background: var(--bg3);
+  color: var(--text);
+}
+
+.mini-btn.danger {
+  color: var(--red);
+  border-color: rgba(255, 90, 90, 0.3);
+}
+
+.mini-btn.danger:hover {
+  background: rgba(255, 90, 90, 0.1);
+}
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--accent);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 24px;
+  cursor: pointer;
+  float: right;
+  margin-top: -4px;
+}
+
+.close-btn:hover {
+  color: var(--text);
+}
+
+.tip {
+  background: rgba(79, 255, 176, 0.05);
+  border: 1px solid rgba(79, 255, 176, 0.15);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--muted2);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.tip strong {
+  color: var(--accent);
+}
+
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--accent);
+  color: var(--bg);
+  padding: 12px 18px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  z-index: 9999;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(400px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.tag {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-right: 6px;
+  margin-bottom: 4px;
+}
+
+.tag.applied {
+  background: rgba(74, 158, 255, 0.15);
+  color: var(--blue);
+}
+
+.tag.interview {
+  background: rgba(155, 109, 255, 0.15);
+  color: #9b6dff;
+}
+
+.tag.offer {
+  background: rgba(79, 255, 176, 0.15);
+  color: var(--accent);
+}
+
+.tag.rejected {
+  background: rgba(255, 90, 90, 0.15);
+  color: var(--red);
+}
+
+.tag.date {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .nav { flex-direction: column; align-items: flex-start; }
+  .form-grid { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="nav">
+    <div class="nav-brand">Scout</div>
+    <button class="nav-btn active" onclick="goTab('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="goTab('jobs')">Jobs <span class="badge" id="jobs-badge">0</span></button>
+    <button class="nav-btn" onclick="goTab('add')">+ Add Job</button>
+    <button class="nav-btn" onclick="goTab('resume')">Resume AI</button>
+    <button class="nav-btn" onclick="goTab('outreach')">Outreach</button>
+    <button class="nav-btn" onclick="goTab('settings')">Settings</button>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="section-dashboard">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-total">0</div>
+          <div class="stat-label">Total Applied</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-interview">0</div>
+          <div class="stat-label">Interviews</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-offer">0</div>
+          <div class="stat-label">Offers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-followup">0</div>
+          <div class="stat-label">Follow-ups</div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <strong>Remember:</strong> Every application is a rep. Keep going!
+      </div>
+    </div>
+
+    <!-- JOBS -->
+    <div class="section" id="section-jobs">
+      <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
+        <h2 style="font-size:16px;margin:0">All Jobs</h2>
+        <select class="form-input" id="filter-status" onchange="showJobs()" style="width:150px;padding:6px;font-size:12px">
+          <option value="all">All</option>
+          <option value="applied">Applied</option>
+          <option value="interview">Interview</option>
+          <option value="offer">Offer</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+      <div id="jobs-list"></div>
+    </div>
+
+    <!-- ADD JOB -->
+    <div class="section" id="section-add">
+      <div class="card">
+        <div class="card-title">Add New Job Application</div>
+        <div class="tip">Fill in the form below to track a new job application.</div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Role *</label>
+            <input class="form-input" id="f-role" placeholder="Customer Onboarding Specialist">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Company *</label>
+            <input class="form-input" id="f-company" placeholder="Intercom">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Job URL</label>
+            <input class="form-input" id="f-url" placeholder="https://linkedin.com/jobs/...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Recruiter Name</label>
+            <input class="form-input" id="f-recruiter" placeholder="John Doe">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hiring Manager</label>
+            <input class="form-input" id="f-hiringmgr" placeholder="Jane Smith">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date Applied</label>
+            <input class="form-input" type="date" id="f-date">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="f-status">
+              <option value="applied">Applied</option>
+              <option value="interview">Interview</option>
+              <option value="offer">Offer</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Notes</label>
+            <textarea class="form-input" id="f-notes" placeholder="Why you want this role..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addJob()">Save Application</button>
+          <button class="btn btn-secondary" onclick="clearForm()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESUME AI -->
+    <div class="section" id="section-resume">
+      <div class="card">
+        <div class="card-title">AI Resume Rewriter</div>
+        <div class="tip">Paste the JD and your resume. AI rewrites your bullets to match the job.</div>
+
+        <div class="form-grid">
+          <div class="form-group full">
+            <label class="form-label">Job Description</label>
+            <textarea class="form-input" id="r-jd" placeholder="Paste full JD here..." style="min-height:120px"></textarea>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Your Resume Bullets</label>
+            <textarea class="form-input" id="r-resume" placeholder="Paste your current resume bullets..." style="min-height:120px"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary">Rewrite with AI (Set API key in Settings)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTREACH -->
+    <div class="section" id="section-outreach">
+      <div class="card">
+        <div class="card-title">Generate Outreach Message</div>
+        <div class="tip">Paste their LinkedIn info. AI generates a personalized message.</div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Contact Name *</label>
+            <input class="form-input" id="o-name" placeholder="Priya Sharma">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Company *</label>
+            <input class="form-input" id="o-company" placeholder="Freshworks">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Their LinkedIn Info</label>
+            <textarea class="form-input" id="o-linkedin" placeholder="e.g. 5 years at company..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary">Generate Message (Set API key in Settings)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="section" id="section-settings">
+      <div class="card">
+        <div class="card-title">AI Provider Setup</div>
+        <div class="tip">Google Gemini is free — 1,500 calls/day with no credit card.</div>
+
+        <div class="form-group">
+          <label class="form-label">AI Provider</label>
+          <select class="form-input" id="ai-provider" onchange="showProvider()">
+            <option value="gemini">Google Gemini (free - recommended)</option>
+            <option value="groq">Groq Llama (free)</option>
+          </select>
+        </div>
+
+        <div id="provider-info" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;line-height:1.8;color:var(--muted2)">
+          <strong style="color:var(--accent)">Google Gemini Setup</strong><br>
+          1. Go to aistudio.google.com<br>
+          2. Sign in with Google<br>
+          3. Click Get API key → Create API key<br>
+          4. Copy the key and paste below
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">API Key</label>
+          <input class="form-input" id="api-key" type="password" placeholder="Paste your API key">
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="saveApiKey()">Save API Key</button>
+        </div>
+
+        <div id="api-status" style="margin-top:8px;font-size:12px;color:var(--accent)"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Your Profile</div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label class="form-label">Name</label>
+            <input class="form-input" id="p-name" placeholder="Your name">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Current Role</label>
+            <textarea class="form-input" id="p-role" placeholder="e.g. Customer Success Specialist"></textarea>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Top Strengths</label>
+            <textarea class="form-input" id="p-strengths" placeholder="e.g. LMS design, reduced TTV by 35%"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="doSaveProfile()">Save Profile</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Data Management</div>
+        <div class="form-actions">
+          <button class="btn btn-secondary" onclick="doExportData()">Export Backup</button>
+          <button class="btn btn-secondary" onclick="doClearAllData()" style="color:var(--red)">Clear All</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- STATUS MODAL -->
+<div class="modal-overlay" id="status-modal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeStatusModal()">×</button>
+    <div class="modal-title">Update Job Status</div>
+    <div class="form-group">
+      <label class="form-label">New Status</label>
+      <select class="form-input" id="modal-status">
+        <option value="applied">Applied</option>
+        <option value="interview">Interview</option>
+        <option value="offer">Offer</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="modal-notes"></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeStatusModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="doSaveStatus()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let jobs = [];
+let profile = {};
+let editingJobId = null;
+
+function loadData() {
+  try { jobs = JSON.parse(localStorage.getItem('scout_jobs') || '[]'); } catch(e) {}
+  try { profile = JSON.parse(localStorage.getItem('scout_profile') || '{}'); } catch(e) {}
+}
+
+function saveJobs() {
+  localStorage.setItem('scout_jobs', JSON.stringify(jobs));
+}
+
+function saveProfile() {
+  localStorage.setItem('scout_profile', JSON.stringify(profile));
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function goTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + tab).classList.add('active');
+  event.target.classList.add('active');
+
+  if (tab === 'dashboard') showDashboard();
+  if (tab === 'jobs') showJobs();
+  if (tab === 'add') document.getElementById('f-date').valueAsDate = new Date();
+  if (tab === 'settings') {
+    document.getElementById('api-key').value = localStorage.getItem('scout_api_key') || '';
+    document.getElementById('p-name').value = profile.name || '';
+    document.getElementById('p-role').value = profile.role || '';
+    document.getElementById('p-strengths').value = profile.strengths || '';
+  }
+}
+
+function showDashboard() {
+  document.getElementById('stat-total').textContent = jobs.length;
+  document.getElementById('stat-interview').textContent = jobs.filter(j => j.status === 'interview').length;
+  document.getElementById('stat-offer').textContent = jobs.filter(j => j.status === 'offer').length;
+  document.getElementById('jobs-badge').textContent = jobs.length;
+}
+
+function showJobs() {
+  const filter = document.getElementById('filter-status').value;
+  let list = filter === 'all' ? jobs : jobs.filter(j => j.status === filter);
+  const el = document.getElementById('jobs-list');
+  
+  if (!list.length) {
+    el.innerHTML = '<div class="empty">No jobs yet.</div>';
+    return;
+  }
+  
+  el.innerHTML = list.map(j => `
+    <div class="job-card">
+      <div class="job-title">${j.role}</div>
+      <div class="job-company">${j.company}</div>
+      <div style="margin:8px 0"><span class="tag ${j.status}">${j.status}</span></div>
+      <div class="job-actions">
+        <button class="mini-btn" onclick="openStatusModal('${j.id}')">Update</button>
+        <button class="mini-btn danger" onclick="deleteJob('${j.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addJob() {
+  const role = document.getElementById('f-role').value.trim();
+  const company = document.getElementById('f-company').value.trim();
+  if (!role || !company) { alert('Role and Company required'); return; }
+  
+  jobs.push({
+    id: Date.now().toString(),
+    role, company,
+    url: document.getElementById('f-url').value.trim(),
+    recruiter: document.getElementById('f-recruiter').value.trim(),
+    hiringmgr: document.getElementById('f-hiringmgr').value.trim(),
+    date: document.getElementById('f-date').value,
+    status: document.getElementById('f-status').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    createdAt: new Date().toISOString()
+  });
+  saveJobs();
+  clearForm();
+  showToast('✓ Job added!');
+  goTab('jobs');
+}
+
+function clearForm() {
+  document.getElementById('f-role').value = '';
+  document.getElementById('f-company').value = '';
+  document.getElementById('f-url').value = '';
+  document.getElementById('f-recruiter').value = '';
+  document.getElementById('f-hiringmgr').value = '';
+  document.getElementById('f-notes').value = '';
+}
+
+function deleteJob(id) {
+  if (confirm('Delete?')) {
+    jobs = jobs.filter(j => j.id !== id);
+    saveJobs();
+    showJobs();
+  }
+}
+
+function openStatusModal(id) {
+  editingJobId = id;
+  document.getElementById('status-modal').classList.add('open');
+}
+
+function closeStatusModal() {
+  document.getElementById('status-modal').classList.remove('open');
+}
+
+function doSaveStatus() {
+  const j = jobs.find(x => x.id === editingJobId);
+  if (!j) return;
+  j.status = document.getElementById('modal-status').value;
+  const note = document.getElementById('modal-notes').value.trim();
+  if (note) j.notes = (j.notes ? j.notes + '\n' : '') + note;
+  saveJobs();
+  closeStatusModal();
+  showJobs();
+  showDashboard();
+}
+
+function showProvider() {
+  const p = document.getElementById('ai-provider').value;
+  document.getElementById('provider-info').textContent = p === 'gemini' ? 'Go to aistudio.google.com → Get API key' : 'Go to console.groq.com → API Keys';
+}
+
+function saveApiKey() {
+  const k = document.getElementById('api-key').value.trim();
+  if (!k) { alert('Enter API key'); return; }
+  localStorage.setItem('scout_api_key', k);
+  showToast('✓ API key saved!');
+}
+
+function doSaveProfile() {
+  profile = {
+    name: document.getElementById('p-name').value.trim(),
+    role: document.getElementById('p-role').value.trim(),
+    strengths: document.getElementById('p-strengths').value.trim()
+  };
+  saveProfile();
+  showToast('✓ Profile saved!');
+}
+
+function doExportData() {
+  const backup = { jobs, profile };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'scout-backup.json';
+  a.click();
+}
+
+function doClearAllData() {
+  if (confirm('Delete ALL data?')) {
+    jobs = [];
+    localStorage.clear();
+    showToast('Cleared');
+  }
+}
+
+loadData();
+document.getElementById('f-date').valueAsDate = new Date();
+showDashboard();
+</script>
+
+</body>
+</html>
